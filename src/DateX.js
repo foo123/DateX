@@ -825,8 +825,9 @@ DateX = function DateX( year, month, day, hour, minutes, seconds, milliseconds )
     {
         self.$date = new Date( );
     }
-    self.$locale = default_date_locale;
+    self.$locale = DateX.defaultLocale;
 };
+DateX.defaultLocale = default_date_locale;
 DateX.VERSION = "0.1";
 DateX.now = Date.now || function( ) { 
     return new Date( ).getTime( ); 
