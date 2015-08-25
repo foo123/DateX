@@ -1,10 +1,10 @@
 /**
 *
-*   Dromeo
-*   Simple and Flexible Routing Framework for PHP, Python, Node/JS
-*   @version: 0.6.4
+*   DateX
+*   eXtended Date parsing / formatting / validation for Node/JS, Python, PHP
+*   @version: 0.1
 *
-*   https://github.com/foo123/Dromeo
+*   https://github.com/foo123/DateX
 *
 **/
 !function( root, name, factory ) {
@@ -32,11 +32,11 @@ else if ( !(name in root) )
 "use strict";
 
 var HAS = 'hasOwnProperty',
+    floor = Math.floor, round = Math.round, abs = Math.abs,
     ESCAPED_RE = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,
     esc_re = function( s ) { 
         return s.replace(ESCAPED_RE, "\\$&"); 
     },
-    floor = Math.floor, round = Math.round, abs = Math.abs,
     by_length_desc = function( a, b ) {
         return b.length - a.length;
     },
@@ -64,65 +64,65 @@ var HAS = 'hasOwnProperty',
         
         defaults = defaults || {};
         
-        if ( null != dto.time ) 
+        if ( dto[HAS]('time') ) 
         {
             time = new Date( dto.time );
             // only time given create full date from unix time
-            if ( null == dto.year && null == dto.month && null == dto.day ) 
+            if ( !dto[HAS]('year') && !dto[HAS]('month') && !dto[HAS]('day') ) 
                 date = new Date( time );
         }
         
         if ( null === date )
         {
-        if ( null != dto.ms ) ms = dto.ms;
-        else if ( null != defaults.ms ) ms = defaults.ms;
+        if ( dto[HAS]('ms') ) ms = dto.ms;
+        else if ( defaults[HAS]('ms') ) ms = defaults.ms;
         else ms = 0;
-        if ( null != dto.second ) second = dto.second;
-        else if ( null != defaults.second ) second = defaults.second;
+        if ( dto[HAS]('second') ) second = dto.second;
+        else if ( defaults[HAS]('second') ) second = defaults.second;
         else second = 0;
-        if ( null != dto.minute ) minute = dto.minute;
-        else if ( null != defaults.minute ) minute = defaults.minute;
+        if ( dto[HAS]('minute') ) minute = dto.minute;
+        else if ( defaults[HAS]('minute') ) minute = defaults.minute;
         else minute = 0;
-        if ( null != dto.hour ) hour = dto.hour;
+        if ( dto[HAS]('hour') ) hour = dto.hour;
         else
         {
-            if ( null != dto.hour_12 )
+            if ( dto[HAS]('hour_12') )
                 hour = 'pm' === dto.meridian ? 11+dto.hour_12 : dto.hour_12-1;
-            else if ( null != defaults.hour ) hour = defaults.hour;
+            else if ( defaults[HAS]('hour') ) hour = defaults.hour;
             else hour = 'pm' === dto.meridian ? 12 : 0;
         }
         
-        if ( null != dto.day ) day = dto.day;
-        else if ( null != defaults.day ) day = defaults.day;
+        if ( dto[HAS]('day') ) day = dto.day;
+        else if ( defaults[HAS]('day') ) day = defaults.day;
         else day = now.getDate( );
-        if ( null != dto.month ) month = dto.month;
-        else if ( null != defaults.month ) month = defaults.month;
+        if ( dto[HAS]('month') ) month = dto.month;
+        else if ( defaults[HAS]('month') ) month = defaults.month;
         else month = now.getMonth( )+1;
-        if ( null != dto.year ) year = dto.year;
-        else if ( null != defaults.year ) year = defaults.year;
+        if ( dto[HAS]('year') ) year = dto.year;
+        else if ( defaults[HAS]('year') ) year = defaults.year;
         else year = now.getFullYear( );
         
         // http://php.net/manual/en/function.checkdate.php
-        if ( 0 > ms ) return false;
+        if ( 0 > ms || 999 < ms ) return false;
         if ( 0 > second || 59 < second ) return false;
         if ( 0 > minute || 59 < minute ) return false;
         if ( 0 > hour || 23 < hour ) return false;
         
         if ( 1 > year || year > 32767 ) return false;
         leap = (year%4 === 0) & (year%100 !== 0) | (year%400 === 0);
-        if ( null != dto.leap && leap !== dto.leap ) return false;
+        if ( dto[HAS]('leap') && leap !== dto.leap ) return false;
         if ( 1 > month || month > 12 ) return false;
         if ( 1 > day || day > 31 ) return false;
         if ( 2 === month && day > 28+leap ) return false;
         
         date = new Date(year, month-1, day, hour, minute, second, ms);
         
-        if ( null != dto.day_week && dto.day_week !== date.getDay() ) return false;
-        if ( null != dto.day_year && dto.day_year !== round((new Date(year, month-1, day) - new Date(year, 0, 1)) / 864e5) ) return false;
-        if ( null != dto.days_month && dto.days_month !== (new Date(year, month, 0)).getDate( ) ) return false;
-        if ( null != dto.meridian && ((hour > 11 && 'am' === dto.meridian) || (hour <= 11 && 'pm' === dto.meridian)) ) return false;
+        if ( dto[HAS]('day_week') && dto.day_week !== date.getDay() ) return false;
+        if ( dto[HAS]('day_year') && dto.day_year !== round((new Date(year, month-1, day) - new Date(year, 0, 1)) / 864e5) ) return false;
+        if ( dto[HAS]('days_month') && dto.days_month !== (new Date(year, month, 0)).getDate( ) ) return false;
+        if ( dto[HAS]('meridian') && ((hour > 11 && 'am' === dto.meridian) || (hour <= 11 && 'pm' === dto.meridian)) ) return false;
         
-        if ( null != time )
+        if ( null !== time )
         {
             if ( date.getFullYear() !== time.getFullYear() ) return false;
             if ( date.getMonth() !== time.getMonth() ) return false;
@@ -637,20 +637,395 @@ var HAS = 'hasOwnProperty',
             formatted_datetime += D[HAS](f) ? D[ f ] : f;
         }
         return formatted_datetime;
-    }
+    },
+    str_format_re = new RegExp('%('+[
+     'Ec'
+    ,'EC'
+    ,'Ex'
+    ,'EX'
+    ,'Ey'
+    ,'EY'
+    ,'Od'
+    ,'Oe'
+    ,'OH'
+    ,'OI'
+    ,'Om'
+    ,'OM'
+    ,'OS'
+    ,'Ou'
+    ,'OU'
+    ,'OV'
+    ,'Ow'
+    ,'OW'
+    ,'Oy'
+    ,'a'
+    ,'A'
+    ,'b'
+    ,'B'
+    ,'c'
+    ,'C'
+    ,'d'
+    ,'D'
+    ,'e'
+    ,'h'
+    ,'H'
+    ,'I'
+    ,'j'
+    ,'m'
+    ,'M'
+    ,'n'
+    ,'p'
+    ,'r'
+    ,'R'
+    ,'S'
+    ,'t'
+    ,'T'
+    ,'u'
+    ,'U'
+    ,'V'
+    ,'w'
+    ,'W'
+    ,'x'
+    ,'X'
+    ,'y'
+    ,'Y'
+    ,'Z'
+    ,'%'
+    ].join('|')+')', 'g'),
+    str_format_repl = {
+        '%' : '%'
+        //is replaced by the locale's abbreviated weekday name. 
+        ,'a' : 'D'
+        //is replaced by the locale's full weekday name. 
+        ,'A' : 'l'
+        //is replaced by the locale's abbreviated month name. 
+        ,'b' : 'M'
+        //is replaced by the locale's full month name. 
+        ,'B' : 'F'
+        //is replaced by the locale's appropriate date and time representation. 
+        ,'c' : 'c'
+        //is replaced by the century number (the year divided by 100 and truncated to an integer) as a decimal number [00-99]. 
+        ,'C' : ''
+        //is replaced by the day of the month as a decimal number [01,31]. 
+        ,'d' : 'd'
+        //same as %m/%d/%y. 
+        ,'D' : 'm/d/y'
+        //is replaced by the day of the month as a decimal number [1,31]; a single digit is preceded by a space. 
+        ,'e' : 'j'
+        //same as %b. 
+        ,'h' : 'M'
+        //is replaced by the hour (24-hour clock) as a decimal number [00,23]. 
+        ,'H' : 'H'
+        //is replaced by the hour (12-hour clock) as a decimal number [01,12]. 
+        ,'I' : 'h'
+        //is replaced by the day of the year as a decimal number [001,366]. 
+        ,'j' : 'z'
+        //is replaced by the month as a decimal number [01,12]. 
+        ,'m' : 'm'
+        //is replaced by the minute as a decimal number [00,59]. 
+        ,'M' : 'i'
+        //is replaced by a newline character. 
+        ,'n' : "\n"
+        //is replaced by the locale's equivalent of either a.m. or p.m. 
+        ,'p' : 'a'
+        //is replaced by the time in a.m. and p.m. notation; in the POSIX locale this is equivalent to %I:%M:%S %p. 
+        ,'r' : 'r'
+        //is replaced by the time in 24 hour notation (%H:%M). 
+        ,'R' : 'H:i'
+        //is replaced by the second as a decimal number [00,61]. 
+        ,'S' : 's'
+        //is replaced by a tab character. 
+        ,'t' : "\t"
+        //is replaced by the time (%H:%M:%S). 
+        ,'T' : 'H:i:s'
+        //is replaced by the weekday as a decimal number [1,7], with 1 representing Monday. 
+        ,'u' : 'N'
+        //is replaced by the week number of the year (Sunday as the first day of the week) as a decimal number [00,53]. 
+        ,'U' : 'W'
+        //is replaced by the week number of the year (Monday as the first day of the week) as a decimal number [01,53]. If the week containing 1 January has four or more days in the new year, then it is considered week 1. Otherwise, it is the last week of the previous year, and the next week is week 1. 
+        ,'V' : 'W'
+        //is replaced by the weekday as a decimal number [0,6], with 0 representing Sunday. 
+        ,'w' : 'w'
+        //is replaced by the week number of the year (Monday as the first day of the week) as a decimal number [00,53]. All days in a new year preceding the first Monday are considered to be in week 0. 
+        ,'W' : 'W'
+        //is replaced by the locale's appropriate date representation. 
+        //,'x' : ''
+        //is replaced by the locale's appropriate time representation. 
+        //,'X' : ''
+        //is replaced by the year without century as a decimal number [00,99]. 
+        ,'y' : 'y'
+        //is replaced by the year with century as a decimal number. 
+        ,'Y' : 'Y'
+        //is replaced by the timezone name or abbreviation, or by no bytes if no timezone information exists. 
+        ,'Z' : 'T'
+        
+        //is replaced by the locale's alternative appropriate date and time representation. 
+        //,'Ec' : ''
+        //is replaced by the name of the base year (period) in the locale's alternative representation. 
+        //,'EC' : ''
+        //is replaced by the locale's alternative date representation. 
+        //,'Ex' : ''
+        //is replaced by the locale' alternative time representation. 
+        //,'EX' : ''
+        //is replaced by the offset from %EC (year only) in the locale's alternative representation. 
+        ,'Ey' : 'y'
+        //is replaced by the full alternative year representation. 
+        ,'EY' : 'Y'
+        //is replaced by the day of the month, using the locale's alternative numeric symbols, filled as needed with leading zeros if there is any alternative symbol for zero, otherwise with leading spaces. 
+        ,'Od' : 'd'
+        //is replaced by the day of month, using the locale's alternative numeric symbols, filled as needed with leading spaces. 
+        ,'Oe' : 'j'
+        //is replaced by the hour (24-hour clock) using the locale's alternative numeric symbols. 
+        ,'OH' : 'H'
+        //is replaced by the hour (12-hour clock) using the locale's alternative numeric symbols. 
+        ,'OI' : 'h'
+        //is replaced by the month using the locale's alternative numeric symbols. 
+        ,'Om' : 'm'
+        //is replaced by the minutes using the locale's alternative numeric symbols. 
+        ,'OM' : 'i'
+        //is replaced by the seconds using the locale's alternative numeric symbols. 
+        ,'OS' : 's'
+        //is replaced by the weekday as a number in the locale's alternative representation (Monday=1). 
+        ,'Ou' : 'N'
+        //is replaced by the week number of the year (Sunday as the first day of the week, rules corresponding to %U) using the locale's alternative numeric symbols. 
+        ,'OU' : 'W'
+        //is replaced by the week number of the year (Monday as the first day of the week, rules corresponding to %V) using the locale's alternative numeric symbols. 
+        ,'OV' : 'W'
+        //is replaced by the number of the weekday (Sunday=0) using the locale's alternative numeric symbols. 
+        ,'Ow' : 'w'
+        //is replaced by the week number of the year (Monday as the first day of the week) using the locale's alternative numeric symbols. 
+        ,'OW' : 'W'
+        //is replaced by the year (offset from %C) using the locale's alternative numeric symbols. 
+        ,'Oy' : 'y'
+    },
+    cformat_to_phpformat = function( cformat ) {
+        // http://pubs.opengroup.org/onlinepubs/007908799/xsh/strftime.html
+        // http://php.net/manual/en/function.date.php
+        return cformat.replace(str_format_re, function(m, g1){
+            return str_format_repl[HAS](g1) ? str_format_repl[g1] : g1;
+        });
+    },
+    DateX
 ;        
 
-// eXtend date object
-Date.prototype.format = function( format, locale ) {
-    format = format || "Y-m-d";
-    locale = locale || default_date_locale;
-    return get_formatted_date( this, format, locale ); 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
+// wrapper around Date built-in object
+DateX = function DateX( year, month, day, hour, minutes, seconds, milliseconds ) {
+    var self = this, argslen = arguments.length;
+    if ( argslen )
+    {
+        if ( year instanceof DateX )
+            self.$date = new Date( year.$date );
+        else if ( 1 === argslen )
+            self.$date = new Date( year );
+        else
+            self.$date = new Date( year, month, day||1, hour||0, minutes||0, seconds||0, milliseconds||0 );
+    }
+    else
+    {
+        self.$date = new Date( );
+    }
 };
-Date.fromString = function( date_string, format, locale ) { 
-    var date_parse = get_date_parser( format || "Y-m-d", locale || default_date_locale );
-    return date_parse( date_string );
+DateX.VERSION = "0.1";
+DateX.now = Date.now || function( ) { 
+    return new Date( ).getTime( ); 
+};
+DateX.UTC = Date.UTC;
+DateX.fromString = DateX.parse = function( date_string, format, locale, strformat ) { 
+    if ( format && true === strformat ) format = cformat_to_phpformat(format);
+    var date_parse = get_date_parser( format || "Y-m-d H:i:s", locale || default_date_locale );
+    var date = date_parse( date_string );
+    return false !== date ? new DateX( date ) : false;
+};
+DateX.prototype = {
+     constructor: DateX
+    
+    ,$date: null
+    
+    ,dispose: function( ) {
+        var self = this;
+        self.$date = null;
+        return self;
+    }
+    
+    ,getDate: function( ) {
+        return this.$date.getDate( );
+    }
+    ,getDay: function( ) {
+        return this.$date.getDay( );
+    }
+    ,getFullYear: function( ) {
+        return this.$date.getFullYear( );
+    }
+    ,getHours: function( ) {
+        return this.$date.getHours( );
+    }
+    ,getMilliseconds: function( ) {
+        return this.$date.getMilliseconds( );
+    }
+    ,getMinutes: function( ) {
+        return this.$date.getMinutes( );
+    }
+    ,getMonth: function( ) {
+        return this.$date.getMonth( );
+    }
+    ,getSeconds: function( ) {
+        return this.$date.getSeconds( );
+    }
+    ,getTime: function( ) {
+        return this.$date.getTime( );
+    }
+    ,getTimezoneOffset: function( ) {
+        return this.$date.getTimezoneOffset( );
+    }
+    ,getUTCDate: function( ) {
+        return this.$date.getUTCDate( );
+    }
+    ,getUTCDay: function( ) {
+        return this.$date.getUTCDay( );
+    }
+    ,getUTCFullYear: function( ) {
+        return this.$date.getUTCFullYear( );
+    }
+    ,getUTCHours: function( ) {
+        return this.$date.getUTCHours( );
+    }
+    ,getUTCMilliseconds: function( ) {
+        return this.$date.getUTCMilliseconds( );
+    }
+    ,getUTCMinutes: function( ) {
+        return this.$date.getUTCMinutes( );
+    }
+    ,getUTCMonth: function( ) {
+        return this.$date.getUTCMonth( );
+    }
+    ,getUTCSeconds: function( ) {
+        return this.$date.getUTCSeconds( );
+    }
+    ,getYear: function( ) {
+        return this.$date.getYear( );
+    }
+    ,setDate: function( d ) {
+        this.$date.setDate( d );
+        return this;
+    }
+    ,setFullYear: function( d ) {
+        this.$date.setFullYear( d );
+        return this;
+    }
+    ,setHours: function( d ) {
+        this.$date.setHours( d );
+        return this;
+    }
+    ,setMilliseconds: function( d ) {
+        this.$date.setMilliseconds( d );
+        return this;
+    }
+    ,setMinutes: function( d ) {
+        this.$date.setMinutes( d );
+        return this;
+    }
+    ,setMonth: function( d ) {
+        this.$date.setMonth( d );
+        return this;
+    }
+    ,setSeconds: function( d ) {
+        this.$date.setSeconds( d );
+        return this;
+    }
+    ,setTime: function( d ) {
+        this.$date.setTime( d );
+        return this;
+    }
+    ,setUTCDate: function( d ) {
+        this.$date.setUTCDate( d );
+        return this;
+    }
+    ,setUTCFullYear: function( d ) {
+        this.$date.setUTCFullYear( d );
+        return this;
+    }
+    ,setUTCHours: function( d ) {
+        this.$date.setUTCHours( d );
+        return this;
+    }
+    ,setUTCMilliseconds: function( d ) {
+        this.$date.setUTCMilliseconds( d );
+        return this;
+    }
+    ,setUTCMinutes: function( d ) {
+        this.$date.setUTCMinutes( d );
+        return this;
+    }
+    ,setUTCMonth: function( d ) {
+        this.$date.setUTCMonth( d );
+        return this;
+    }
+    ,setUTCSeconds: function( d ) {
+        this.$date.setUTCSeconds( d );
+        return this;
+    }
+    ,setYear: function( d ) {
+        this.$date.setYear( d );
+        return this;
+    }
+    ,toISOString: function( ) {
+        return this.$date.toISOString( );
+    }
+    ,toJSON: function( ) {
+        return this.$date.toJSON( );
+    }
+    ,toGMTString: function( ) {
+        return this.$date.toGMTString( );
+    }
+    ,toSource: function( ) {
+        return this.$date.toSource( );
+    }
+    ,valueOf: function( ) {
+        return this.$date.valueOf( );
+    }
+    ,format: function( format, locale ) {
+        format = format || "Y-m-d H:i:s";
+        locale = locale || default_date_locale;
+        return get_formatted_date( this.$date, format, locale ); 
+    }
+    ,strformat: function( format, locale ) {
+        locale = locale || default_date_locale;
+        return get_formatted_date( this.$date, cformat_to_phpformat(format), locale ); 
+    }
+    ,toLocaleFormat: function( format, locale ) {
+        return this.format( format, locale );
+        //return this.$date.toLocaleFormat( );
+    }
+    ,toDateString: function( format ) {
+        if ( arguments.length ) return this.format( format );
+        return this.$date.toDateString( );
+    }
+    ,toTimeString: function( format ) {
+        if ( arguments.length ) return this.format( format );
+        return this.$date.toTimeString( );
+    }
+    ,toLocaleDateString: function( format, locale ) {
+        if ( arguments.length ) return this.format( format, locale );
+        return this.$date.toLocaleDateString( );
+    }
+    ,toLocaleTimeString: function( format, locale ) {
+        if ( arguments.length ) return this.format( format, locale );
+        return this.$date.toLocaleTimeString( );
+    }
+    ,toLocaleString: function( format, locale ) {
+        if ( arguments.length ) return this.format( format, locale );
+        return this.$date.toLocaleString( );
+    }
+    ,toUTCString: function( ) {
+        return this.$date.toUTCString( );
+    }
+    ,toString: function( format, locale ) {
+        if ( arguments.length ) return this.format( format, locale );
+        return this.$date.toString( );
+    }
 };
 
 // export it
-//return DateX;
+return DateX;
 });
