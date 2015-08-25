@@ -265,28 +265,28 @@ var HAS = 'hasOwnProperty',
          d: function( d, date ) {
              d = parseInt('0' === d.charAt(0) ? d.slice(1) : d, 10);
              if ( d < 1 || d > 31 ) return false;
-             if ( null != date.day && d !== date.day ) return false;
+             if ( date[HAS]('day') && d !== date.day ) return false;
              date.day = d;
          }
         // Shorthand day name; Mon...Sun
         ,D: function( D, date ) {
              D = locale.day_short.indexOf( D );
              if ( D < 0 ) return false;
-             if ( null != date.day_week && D !== date.day_week ) return false;
+             if ( date[HAS]('day_week') && D !== date.day_week ) return false;
              date.day_week = D;
          }
         // Day of month; 1..31
         ,j: function( j, date ) {
              j = parseInt(j, 10);
              if ( j < 1 || j > 31 ) return false;
-             if ( null != date.day && j !== date.day ) return false;
+             if ( date[HAS]('day') && j !== date.day ) return false;
              date.day = j;
          }
         // Full day name; Monday...Sunday
         ,l: function( l, date ) {
              l = locale.day.indexOf( l );
              if ( l < 0 ) return false;
-             if ( null != date.day_week && l !== date.day_week ) return false;
+             if ( date[HAS]('day_week') && l !== date.day_week ) return false;
              date.day_week = l;
          }
         // ISO-8601 day of week; 1[Mon]..7[Sun]
@@ -294,7 +294,7 @@ var HAS = 'hasOwnProperty',
              N = parseInt(N, 10);
              if ( N < 1 || N > 7 ) return false;
              if ( 7 === N ) N = 0;
-             if ( null != date.day_week && N !== date.day_week ) return false;
+             if ( date[HAS]('day_week') && N !== date.day_week ) return false;
              date.day_week = N;
          }
         // Ordinal suffix for day of month; st, nd, rd, th
@@ -303,7 +303,7 @@ var HAS = 'hasOwnProperty',
         ,w: function( w, date ) {
              w = parseInt(w, 10);
              if ( w < 0 || w > 6 ) return false;
-             if ( null != date.day_week && w !== date.day_week ) return false;
+             if ( date[HAS]('day_week') && w !== date.day_week ) return false;
              date.day_week = w;
          }
         // Day of year; 0..365(6)
@@ -326,28 +326,28 @@ var HAS = 'hasOwnProperty',
         ,F: function( F, date ) {
              F = locale.month.indexOf( F );
              if ( F < 0 ) return false;
-             if ( null != date.month && F+1 !== date.month ) return false;
+             if ( date[HAS]('month') && F+1 !== date.month ) return false;
              date.month = F+1;
          }
         // Month w/leading 0; 01...12
         ,m: function( m, date ) {
              m = parseInt('0' === m.charAt(0) ? m.slice(1) : m, 10);
              if ( m < 1 || m > 12 ) return false;
-             if ( null != date.month && m !== date.month ) return false;
+             if ( date[HAS]('month') && m !== date.month ) return false;
              date.month = m;
          }
         // Shorthand month name; Jan...Dec
         ,M: function( M, date ) {
              M = locale.month_short.indexOf( M );
              if ( M < 0 ) return false;
-             if ( null != date.month && M+1 !== date.month ) return false;
+             if ( date[HAS]('month') && M+1 !== date.month ) return false;
              date.month = M+1;
          }
         // Month; 1...12
         ,n: function( n, date ) {
              n = parseInt(n, 10);
              if ( n < 1 || n > 12 ) return false;
-             if ( null != date.month && n !== date.month ) return false;
+             if ( date[HAS]('month') && n !== date.month ) return false;
              date.month = n;
          }
         // Days in month; 28...31
@@ -370,7 +370,7 @@ var HAS = 'hasOwnProperty',
         ,Y: function( Y, date ) {
              Y = parseInt(Y, 10);
              if ( Y < 1000 || Y > 3000 ) return false;
-             if ( null != date.year && Y !== date.year ) return false;
+             if ( date[HAS]('year') && Y !== date.year ) return false;
              date.year = Y;
          }
         // Last two digits of year; 00...99
@@ -383,7 +383,7 @@ var HAS = 'hasOwnProperty',
              }
              y = parseInt(y , 10);
              if ( y < 1000 || y > 3000 ) return false;
-             if ( null != date.year && y !== date.year ) return false;
+             if ( date[HAS]('year') && y !== date.year ) return false;
              date.year = y;
          }
 
@@ -393,7 +393,7 @@ var HAS = 'hasOwnProperty',
             if ( locale.meridian.am === a ) a = 'am';
             else if ( locale.meridian.pm === a ) a = 'pm';
             else return false;
-            if ( null != date.meridian && a !== date.meridian ) return false;
+            if ( date[HAS]('meridian') && a !== date.meridian ) return false;
             date.meridian = a;
          }
         // AM or PM
@@ -401,7 +401,7 @@ var HAS = 'hasOwnProperty',
             if ( locale.meridian.AM === A ) A = 'am';
             else if ( locale.meridian.PM === A ) A = 'pm';
             else return false;
-            if ( null != date.meridian && A !== date.meridian ) return false;
+            if ( date[HAS]('meridian') && A !== date.meridian ) return false;
             date.meridian = A;
          }
         // Swatch Internet time; 000..999
@@ -410,42 +410,42 @@ var HAS = 'hasOwnProperty',
         ,g: function( g, date ) {
             g = parseInt(g, 10);
             if ( g < 1 || g > 12 ) return false;
-            if ( null != date.hour_12 && g !== date.hour_12 ) return false;
+            if ( date[HAS]('hour_12') && g !== date.hour_12 ) return false;
             date.hour_12 = g;
          }
         // 24-Hours; 0..23
         ,G: function( G, date ) {
             G = parseInt(G, 10);
             if ( G < 0 || G > 23 ) return false;
-            if ( null != date.hour && G !== date.hour ) return false;
+            if ( date[HAS]('hour') && G !== date.hour ) return false;
             date.hour = G;
          }
         // 12-Hours w/leading 0; 01..12
         ,h: function( h, date ) {
             h = parseInt('0' === h.charAt(0) ? h.slice(1) : h, 10);
             if ( h < 1 || h > 12 ) return false;
-            if ( null != date.hour_12 && h !== date.hour_12 ) return false;
+            if ( date[HAS]('hour_12') && h !== date.hour_12 ) return false;
             date.hour_12 = h;
          }
         // 24-Hours w/leading 0; 00..23
         ,H: function( H, date ) {
             H = parseInt('0' === H.charAt(0) ? H.slice(1) : H, 10);
             if ( H < 0 || H > 23 ) return false;
-            if ( null != date.hour && H !== date.hour ) return false;
+            if ( date[HAS]('hour') && H !== date.hour ) return false;
             date.hour = H;
          }
         // Minutes w/leading 0; 00..59
         ,i: function( i, date ) {
             i = parseInt('0' === i.charAt(0) ? i.slice(1) : i, 10);
             if ( i < 0 || i > 59 ) return false;
-            if ( null != date.minute && i !== date.minute ) return false;
+            if ( date[HAS]('minute') && i !== date.minute ) return false;
             date.minute = i;
          }
         // Seconds w/leading 0; 00..59
         ,s: function( s, date ) {
             s = parseInt('0' === s.charAt(0) ? s.slice(1) : s, 10);
             if ( s < 0 || s > 59 ) return false;
-            if ( null != date.second && s !== date.second ) return false;
+            if ( date[HAS]('second') && s !== date.second ) return false;
             date.second = s;
          }
         // Microseconds; 000000-999000
@@ -453,9 +453,9 @@ var HAS = 'hasOwnProperty',
             var p = 0;
             while (u.length > 1 && '0'===u.charAt(p)) p++;
             u = parseInt(u.slice(p), 10);
-            if ( u < 0 ) return false;
             u = ~~(u/1000);
-            if ( null != date.ms && u !== date.ms ) return false;
+            if ( u < 0 || u > 999 ) return false;
+            if ( date[HAS]('ms') && u !== date.ms ) return false;
             date.ms = u;
          }
 
@@ -479,7 +479,7 @@ var HAS = 'hasOwnProperty',
             U = parseInt(U, 10);
             if ( U < 0 ) return false;
             U *= 1000;
-            if ( null != date.time && U !== date.time ) return false;
+            if ( date[HAS]('time') && U !== date.time ) return false;
             date.time = U;
          }
         // ISO-8601 date. Y-m-d\\TH:i:sP
@@ -825,6 +825,7 @@ DateX = function DateX( year, month, day, hour, minutes, seconds, milliseconds )
     {
         self.$date = new Date( );
     }
+    self.$locale = default_date_locale;
 };
 DateX.VERSION = "0.1";
 DateX.now = Date.now || function( ) { 
@@ -841,11 +842,35 @@ DateX.prototype = {
      constructor: DateX
     
     ,$date: null
+    ,$locale: null
     
     ,dispose: function( ) {
         var self = this;
         self.$date = null;
+        self.$locale = null;
         return self;
+    }
+    ,getDateObject: function( ) {
+        return this.$date;
+    }
+    ,setDateObject: function( date ) {
+        var self = this;
+        self.$date = date;
+        return self;
+    }
+    ,getLocale: function( ) {
+        return this.$locale;
+    }
+    ,setLocale: function( locale ) {
+        var self = this;
+        self.$locale = locale;
+        return self;
+    }
+    ,format: function( format, locale ) {
+        return get_formatted_date( this.$date, format || "Y-m-d H:i:s", locale || this.$locale ); 
+    }
+    ,strformat: function( format, locale ) {
+        return get_formatted_date( this.$date, cformat_to_phpformat( format ), locale || this.$locale ); 
     }
     
     ,getDate: function( ) {
@@ -984,37 +1009,27 @@ DateX.prototype = {
     ,valueOf: function( ) {
         return this.$date.valueOf( );
     }
-    ,format: function( format, locale ) {
-        format = format || "Y-m-d H:i:s";
-        locale = locale || default_date_locale;
-        return get_formatted_date( this.$date, format, locale ); 
+    ,toLocaleFormat: function( format ) {
+        return this.format( format );
     }
-    ,strformat: function( format, locale ) {
-        locale = locale || default_date_locale;
-        return get_formatted_date( this.$date, cformat_to_phpformat(format), locale ); 
-    }
-    ,toLocaleFormat: function( format, locale ) {
-        return this.format( format, locale );
-        //return this.$date.toLocaleFormat( );
-    }
-    ,toDateString: function( format ) {
-        if ( arguments.length ) return this.format( format );
+    ,toDateString: function( format, locale ) {
+        if ( arguments.length ) return this.format( format, locale );
         return this.$date.toDateString( );
     }
-    ,toTimeString: function( format ) {
-        if ( arguments.length ) return this.format( format );
+    ,toTimeString: function( format, locale ) {
+        if ( arguments.length ) return this.format( format, locale );
         return this.$date.toTimeString( );
     }
-    ,toLocaleDateString: function( format, locale ) {
-        if ( arguments.length ) return this.format( format, locale );
+    ,toLocaleDateString: function( format ) {
+        if ( arguments.length ) return this.format( format );
         return this.$date.toLocaleDateString( );
     }
-    ,toLocaleTimeString: function( format, locale ) {
-        if ( arguments.length ) return this.format( format, locale );
+    ,toLocaleTimeString: function( format ) {
+        if ( arguments.length ) return this.format( format );
         return this.$date.toLocaleTimeString( );
     }
-    ,toLocaleString: function( format, locale ) {
-        if ( arguments.length ) return this.format( format, locale );
+    ,toLocaleString: function( format ) {
+        if ( arguments.length ) return this.format( format );
         return this.$date.toLocaleString( );
     }
     ,toUTCString: function( ) {
