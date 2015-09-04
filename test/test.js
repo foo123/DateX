@@ -1,5 +1,7 @@
 var DateX = require('../src/DateX');
 
+console.log('DateX.VERSION = ' + DateX.VERSION);
+
 var date = new DateX( );
 var formatted = date.format('D, Y-m-d H:i:s');
 console.log(formatted);

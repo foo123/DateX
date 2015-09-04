@@ -1,2 +1,3 @@
 # DateX
-eXtended Date parsing / formatting / validation for Node/JS, Python, PHP
+
+eXtended and localised Date parsing, formatting and validation for Node/JS, Python, PHP
