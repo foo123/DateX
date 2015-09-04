@@ -1270,7 +1270,8 @@ function check_and_create_date( dto, defaults )
 {
     var year, month, day, 
         hour, minute, second, ms,
-        leap=0, date=null, time=null, now=new Date( );
+        leap=0, days_in_month=[31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+        date=null, time=null, now=new Date( );
     
     defaults = defaults || {};
     
@@ -1321,15 +1322,15 @@ function check_and_create_date( dto, defaults )
     if ( 1 > year || year > 32767 ) return false;
     leap = (year%4 === 0) & (year%100 !== 0) | (year%400 === 0);
     if ( dto[HAS]('leap') && leap !== dto.leap ) return false;
+    days_in_month[1]+=leap;
     if ( 1 > month || month > 12 ) return false;
-    if ( 1 > day || day > 31 ) return false;
-    if ( 2 === month && day > 28+leap ) return false;
+    if ( 1 > day || day > days_in_month[month-1] ) return false;
     
     date = new Date(year, month-1, day, hour, minute, second, ms);
     
     if ( dto[HAS]('day_week') && dto.day_week !== date.getDay() ) return false;
     if ( dto[HAS]('day_year') && dto.day_year !== round((new Date(year, month-1, day) - new Date(year, 0, 1)) / 864e5) ) return false;
-    if ( dto[HAS]('days_month') && dto.days_month !== (new Date(year, month, 0)).getDate( ) ) return false;
+    if ( dto[HAS]('days_month') && dto.days_month !== days_in_month[month-1] ) return false;
     if ( dto[HAS]('meridian') && ((hour > 11 && 'am' === dto.meridian) || (hour <= 11 && 'pm' === dto.meridian)) ) return false;
     
     if ( null !== time )
