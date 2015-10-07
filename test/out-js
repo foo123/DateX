@@ -1,18 +1,19 @@
 DateX.VERSION = 0.2.0
-Tue, 2015-10-06 15:11:22
-Tue, 2015-10-06 15:11:22
-10/06/2015 15:11:22
-10/06/2015 15:11:22
-Sat, 2015-11-07 15:11:32 MINUS Tue, 2015-10-06 15:11:22
+Wed, 2015-10-07 17:14:29
+Wed, 2015-10-07 17:14:29
+10/07/2015 17:14:29
+10/07/2015 17:14:29
+(Sun, 2015-11-08 17:45:09) MINUS (Wed, 2015-10-07 17:14:29)
 { sign: 1,
   years: 0,
   months: 1,
-  days: 2,
-  hours: 1,
-  mins: 0,
-  secs: 9,
-  millis: 319 }
+  days: 1,
+  hours: 0,
+  minutes: 31,
+  seconds: -20,
+  milliseconds: -633 }
 Difference (in days) ~ 32
-Approximately: 1 month, 2 days and 1 hour later
-Sun, 2015-11-08 15:11:32
-Sat, 2015-11-07 15:11:32
+Approximately: 1 month, 1 day and 31 minutes later
+Sun, 2015-11-08 17:45:09
+Sun, 2015-11-08 17:45:09
+Sun, 2015-11-08 17:45:09

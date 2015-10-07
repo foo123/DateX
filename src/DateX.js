@@ -1,7 +1,7 @@
 /**
 *
 *   DateX
-*   eXtended and localised Date parsing, formatting and validation for Node/JS, Python, PHP
+*   eXtended and localised Date parsing, diffing, formatting and validation for Node/JS, Python, PHP
 *   @version: 0.2.0
 *
 *   https://github.com/foo123/DateX
@@ -67,20 +67,20 @@ var HAS = 'hasOwnProperty', floor = Math.floor, ceil = Math.ceil, round = Math.r
     }
     },
     
-    d_DH = 24, d_Hm = 60, d_ms = 60, d_smi = 1000, d_YM = 12, d_MD = 30, d_MD1 = 30.5, d_YD = 365, d_YD1 = 365.5,
+    d_DH = 24, d_Hm = 60, d_ms = 60, d_smi = 1000, d_YM = 12, d_MD = 30, d_MD1 = 30.417, d_YD = 365, d_YD1 = 365.25,
     d_mmi = d_ms*d_smi,
     d_Hmi = d_Hm*d_mmi,
     d_Dmi = d_DH*d_Hmi,
     d_Mmi = d_MD1*d_Dmi,
     d_Ymi = d_YD1*d_Dmi,
     Dur = [
-    ['millis', 1],
-    ['secs',   d_smi],
-    ['mins',   d_mmi],
-    ['hours',  d_Hmi],
-    ['days',   d_Dmi],
-    ['months', d_MD*d_Dmi],
-    ['years',  d_YD*d_Dmi]
+    ['milliseconds', 1],
+    ['seconds',      d_smi],
+    ['minutes',      d_mmi],
+    ['hours',        d_Hmi],
+    ['days',         d_Dmi],
+    ['months',       d_MD*d_Dmi],
+    ['years',        d_YD*d_Dmi]
     ],
     Dunit = {
     years: d_Ymi,
@@ -1418,11 +1418,11 @@ function phpformat_to_cformat( format )
     });
 }
 
-function date_diff( d2, d1 )
+/*function date_diff( d2, d1 )
 {
     var t1 = d1.getTime(), 
         t2 = d2.getTime(),
-        d, r, m, dy, n = Dur.length, i, tmp,
+        d, r, m, Y1, Y2, n = Dur.length, i, tmp,
         leapdays = 0,
         diff = {
             sign: 1,
@@ -1430,9 +1430,9 @@ function date_diff( d2, d1 )
             months: 0,
             days: 0,
             hours: 0,
-            mins: 0,
-            secs: 0,
-            millis: 0
+            minutes: 0,
+            seconds: 0,
+            milliseconds: 0
         };
     
     if ( t1 > t2 )
@@ -1442,137 +1442,53 @@ function date_diff( d2, d1 )
         tmp = t1; t1 = t2; t2 = tmp; 
     }
     
-    d = t2-t1; dy = d2.getFullYear()-d1.getFullYear();
-    leapdays = floor(
-              dy/4          // how many Caesarian leap years
-            - dy/100        // Centuries
-            + dy/400
-    );
+    d = t2-t1; Y2 = d2.getFullYear(); Y1 = d1.getFullYear();
+    leapdays =
+              floor(Y2/4) - floor(Y1/4)            // how many Caesarian leap years
+            - (floor(Y2/100) - floor(Y1/100))      // Centuries
+            + floor(Y2/400) - floor(Y1/400)
+    ;
     for (i=n-1; i>=0; i--)
     {
         m = Dur[i][1];
         r = floor(d/m);
-        if ( i+3 === n /*days*/ ) r += leapdays;
+        if ( i+3 === n /*days* / ) r += leapdays;
         d -= r*m;
         diff[Dur[i][0]] = r;
     }
     return diff;
-}
+}*/
 
-function date_add( d, diff, overwrite )
+function date_diff_exact( d2, d1 )
 {
-    var d2 = true === overwrite ? d : new DateX(d),
-        days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
-        ndays, i, md2 = 28, t = 0, r, leap,
-        //t0 = Date.UTC(1970, 0, 1, 0, 0, 0, 0),
-        t0 = d.getTimezoneOffset( ),
-        sgn = diff.sign < 0 ? -1 : 1, 
-        Y = d.getFullYear(),
-        M = d.getMonth(),
-        D = d.getDate(),
-        H = d.getHours(),
-        m = d.getMinutes(),
-        s = d.getSeconds(),
-        mi = d.getMilliseconds()
-    ;
+    var tmp,
+        diff = {
+            sign: 1,
+            years: 0,
+            months: 0,
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0,
+            milliseconds: 0
+        };
     
-    mi += sgn * diff.millis;
-    if ( mi < 0 )
+    if ( d1.getTime() > d2.getTime() )
     {
-        r = ceil((-mi)/d_smi);
-        s -= r;
-        mi += r*d_smi;
-    }
-    if ( mi >= d_smi )
-    {
-        r = ceil(mi/d_smi);
-        s += r;
-        mi -= r*d_smi;
-    }
-    //t += mi;
-    
-    s += sgn * diff.secs;
-    if ( s < 0 )
-    {
-        r = ceil((-s)/d_ms);
-        m -= r;
-        s += r*d_ms;
-    }
-    if ( s >= d_ms )
-    {
-        r = floor(s/d_ms);
-        m += r;
-        s -= r*d_ms;
-    }
-    //t += s*d_smi;
-    
-    m += sgn * diff.mins;
-    if ( m < 0 )
-    {
-        r = ceil((-m)/d_Hm);
-        H -= r;
-        m += r*d_Hm;
-    }
-    if ( m >= d_Hm )
-    {
-        r = floor(m/d_Hm);
-        H += r;
-        m -= r*d_Hm;
-    }
-    //t += m*d_mmi;
-    
-    H += sgn * diff.hours;
-    if ( H < 0 )
-    {
-        r = ceil((-H)/d_DH);
-        D -= r;
-        H += r*d_DH;
-    }
-    if ( H >= d_DH )
-    {
-        r = floor(H/d_DH);
-        D += r;
-        H -= r*d_DH;
-    }
-    //t += H*d_Hmi;
-    
-    Y += sgn * diff.years;
-    M += sgn * diff.months;
-    if ( M < 0 )
-    {
-        r = ceil((-M)/d_YM);
-        Y -= r;
-        M += r*d_YM;
-    }
-    if ( M >= d_YM )
-    {
-        r = floor(M/d_YM);
-        Y += r;
-        M -= r*d_YM;
+        diff.sign = -1;
+        tmp = d1; d1 = d2; d2 = tmp; 
     }
     
-    if ( Y <= 0 ) Y = 1;
-    leap = (Y%4 === 0) & (Y%100 !== 0) | (Y%400 === 0);
-    days_in_month[1] = md2+leap;
-    
-    D += sgn * diff.days;
-    while ( D <= 0 || D > days_in_month[M] )
-    {
-        if ( D <= 0 ) D += days_in_month[--M];
-        else D -= days_in_month[++M];
-    }
-    
-    /*ndays = 0;
-    for (i=0; i<M; i++) ndays += days_in_month[i];
-    ndays += D+(Y-1)*d_YM*d_MD;
-    d2.setTime(t+round(ndays*d_Dmi)-t0);*/
-    d2.setTime(Date.UTC(Y, M, D, H, m, s, mi)+t0*d_mmi)
-    //console.log([Y, M+1, D, H, m, s]);
-    return d2;
+    diff.years = d2.getFullYear()-d1.getFullYear();
+    diff.months = d2.getMonth()-d1.getMonth();
+    diff.days = d2.getDate()-d1.getDate();
+    diff.hours = d2.getHours()-d1.getHours();
+    diff.minutes = d2.getMinutes()-d1.getMinutes();
+    diff.seconds = d2.getSeconds()-d1.getSeconds();
+    diff.milliseconds = d2.getMilliseconds()-d1.getMilliseconds();
+    return diff;
 }
-
-
-function date_udiff_approx( d2, d1, n )
+/*function date_udiff_approx( d2, d1, n )
 {
     var d = d2.getTime() - d1.getTime(), 
         unit = 'seconds', sign = 1, u, r, l;
@@ -1658,7 +1574,306 @@ function date_udiff_approx( d2, d1, n )
     u = u.reverse( );
     if ( l > n ) u = u.slice(0, n);
     return {rel: u, sign: sign};
+}*/
+function date_diff_approx( d2, d1, n )
+{
+    var tmp, sign = 1, u = [], unit, d, r;
+    n = n || 1;
+    if ( d2.getTime() < d1.getTime() )
+    {
+        sign = -1;
+        tmp = d1; d1 = d2; d2 = tmp;
+    }
+    
+    r = 0;
+    d = d2.getFullYear()-d1.getFullYear();
+    if ( d > 0 ) u.push([d, 'years']);
+    
+    d = d2.getMonth()-d1.getMonth();
+    if ( d > 0 ) u.push([d, 'months']);
+    else if ( d < 0 ) r = d*d_MD1;
+    
+    d = d2.getDate()-d1.getDate() + r;
+    if ( d > 0 ) { u.push([round(d), 'days']); r = 0; }
+    else if ( d < 0 ) r = d*d_DH;
+    
+    d = d2.getHours()-d1.getHours() + r;
+    if ( d > 0 ) { u.push([round(d), 'hours']); r = 0; }
+    else if ( d < 0 ) r = d*d_Hm;
+    
+    d = d2.getMinutes()-d1.getMinutes() + r;
+    if ( d > 0 ) { u.push([round(d), 'minutes']); r = 0; }
+    else if ( d < 0 ) r = d*d_ms;
+    
+    d = d2.getSeconds()-d1.getSeconds() + r;
+    if ( d > 0 ) { u.push([round(d), 'seconds']); r = 0; }
+    
+    if ( !u.length ) u.push[[0, 'seconds']];
+    if ( u.length > n ) u = u.slice(0, n);
+    return {rel: u, sign: sign};
 }
+
+/*function date_add( d, diff, overwrite )
+{
+    var d2 = true === overwrite ? d : new DateX(d),
+        days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+        ndays, i, md2 = 28, t = 0, r, leap,
+        //t0 = Date.UTC(1970, 0, 1, 0, 0, 0, 0),
+        t0 = d.getTimezoneOffset( ),
+        sgn = diff[HAS]('sign')&&(diff.sign < 0) ? -1 : 1, 
+        Y = d.getFullYear(),
+        M = d.getMonth(),
+        D = d.getDate(),
+        H = d.getHours(),
+        m = d.getMinutes(),
+        s = d.getSeconds(),
+        mi = d.getMilliseconds()
+    ;
+    
+    if ( diff[HAS]('milliseconds') )
+    {
+        mi += sgn * diff.milliseconds;
+        if ( mi < 0 )
+        {
+            r = ceil((-mi)/d_smi);
+            s -= r;
+            mi += r*d_smi;
+        }
+        if ( mi >= d_smi )
+        {
+            r = ceil(mi/d_smi);
+            s += r;
+            mi -= r*d_smi;
+        }
+        //t += mi;
+    }
+    
+    if ( diff[HAS]('seconds') )
+    {
+        s += sgn * diff.seconds;
+        if ( s < 0 )
+        {
+            r = ceil((-s)/d_ms);
+            m -= r;
+            s += r*d_ms;
+        }
+        if ( s >= d_ms )
+        {
+            r = floor(s/d_ms);
+            m += r;
+            s -= r*d_ms;
+        }
+        //t += s*d_smi;
+    }
+    
+    if ( diff[HAS]('minutes') )
+    {
+        m += sgn * diff.minutes;
+        if ( m < 0 )
+        {
+            r = ceil((-m)/d_Hm);
+            H -= r;
+            m += r*d_Hm;
+        }
+        if ( m >= d_Hm )
+        {
+            r = floor(m/d_Hm);
+            H += r;
+            m -= r*d_Hm;
+        }
+        //t += m*d_mmi;
+    }
+    
+    if ( diff[HAS]('hours') )
+    {
+        H += sgn * diff.hours;
+        if ( H < 0 )
+        {
+            r = ceil((-H)/d_DH);
+            D -= r;
+            H += r*d_DH;
+        }
+        if ( H >= d_DH )
+        {
+            r = floor(H/d_DH);
+            D += r;
+            H -= r*d_DH;
+        }
+        //t += H*d_Hmi;
+    }
+    
+    if ( diff[HAS]('years') )
+    {
+        Y += sgn * diff.years;
+    }
+    if ( diff[HAS]('months') )
+    {
+        M += sgn * diff.months;
+        if ( M < 0 )
+        {
+            r = ceil((-M)/d_YM);
+            Y -= r;
+            M += r*d_YM;
+        }
+        if ( M >= d_YM )
+        {
+            r = floor(M/d_YM);
+            Y += r;
+            M -= r*d_YM;
+        }
+    }
+    
+    if ( Y <= 0 ) Y = 1;
+    leap = (Y%4 === 0) & (Y%100 !== 0) | (Y%400 === 0);
+    days_in_month[1] = md2+leap;
+    
+    if ( diff[HAS]('days') )
+    {
+        D += sgn * diff.days;
+    }
+    while ( D <= 0 || D > days_in_month[M] )
+    {
+        if ( D <= 0 ) D += days_in_month[--M];
+        else D -= days_in_month[M++];
+    }
+    
+    /*ndays = 0;
+    for (i=0; i<M; i++) ndays += days_in_month[i];
+    ndays += D+(Y-1)*d_YM*d_MD;
+    d2.setTime(t+round(ndays*d_Dmi)-t0);* /
+    d2.setTime(Date.UTC(Y, M, D, H, m, s, mi)+t0*d_mmi);
+    //console.log([Y, M+1, D, H, m, s]);
+    return d2;
+}*/
+function date_add_exact( d, diff, overwrite )
+{
+    var d2 = true === overwrite ? d : new DateX(d),
+        days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+        ndays, i, md2 = 28, r, leap,
+        t0 = d.getTimezoneOffset( ),
+        sgn = diff[HAS]('sign')&&(diff.sign < 0) ? -1 : 1, 
+        Y = d.getFullYear(),
+        M = d.getMonth(),
+        D = d.getDate(),
+        H = d.getHours(),
+        m = d.getMinutes(),
+        s = d.getSeconds(),
+        mi = d.getMilliseconds()
+    ;
+    
+    if ( diff[HAS]('years') )
+    {
+        Y += sgn * diff.years;
+    }
+    if ( diff[HAS]('months') )
+    {
+        M += sgn * diff.months;
+        if ( M < 0 )
+        {
+            r = ceil((-M)/d_YM);
+            Y -= r;
+            M += r*d_YM;
+        }
+        if ( M >= d_YM )
+        {
+            r = floor(M/d_YM);
+            Y += r;
+            M -= r*d_YM;
+        }
+    }
+    
+    if ( Y <= 0 ) Y = 1;
+    leap = (Y%4 === 0) & (Y%100 !== 0) | (Y%400 === 0);
+    days_in_month[1] = md2+leap;
+    
+    // adjust day to be same on the new month, eg the last day, the first day and so on..
+    // this is what exact means in this context
+    if ( D > days_in_month[M] ) D = days_in_month[M];
+    
+    // now add any new diff days
+    if ( diff[HAS]('days') )
+    {
+        D += sgn * diff.days;
+    }
+    
+    if ( diff[HAS]('milliseconds') )
+    {
+        mi += sgn * diff.milliseconds;
+        if ( mi < 0 )
+        {
+            r = ceil((-mi)/d_smi);
+            s -= r;
+            mi += r*d_smi;
+        }
+        if ( mi >= d_smi )
+        {
+            r = ceil(mi/d_smi);
+            s += r;
+            mi -= r*d_smi;
+        }
+    }
+    
+    if ( diff[HAS]('seconds') )
+    {
+        s += sgn * diff.seconds;
+        if ( s < 0 )
+        {
+            r = ceil((-s)/d_ms);
+            m -= r;
+            s += r*d_ms;
+        }
+        if ( s >= d_ms )
+        {
+            r = floor(s/d_ms);
+            m += r;
+            s -= r*d_ms;
+        }
+    }
+    
+    if ( diff[HAS]('minutes') )
+    {
+        m += sgn * diff.minutes;
+        if ( m < 0 )
+        {
+            r = ceil((-m)/d_Hm);
+            H -= r;
+            m += r*d_Hm;
+        }
+        if ( m >= d_Hm )
+        {
+            r = floor(m/d_Hm);
+            H += r;
+            m -= r*d_Hm;
+        }
+    }
+    
+    if ( diff[HAS]('hours') )
+    {
+        H += sgn * diff.hours;
+        if ( H < 0 )
+        {
+            r = ceil((-H)/d_DH);
+            D -= r;
+            H += r*d_DH;
+        }
+        if ( H >= d_DH )
+        {
+            r = floor(H/d_DH);
+            D += r;
+            H -= r*d_DH;
+        }
+    }
+    
+    while ( D <= 0 || D > days_in_month[M] )
+    {
+        if ( D <= 0 ) D += days_in_month[--M];
+        else D -= days_in_month[M++];
+    }
+    
+    d2.setDateObject(new Date(Y, M, D, H, m, s, mi));
+    return d2;
+}
+
 // http://www.htmlgoodies.com/html5/javascript/calculating-the-difference-between-two-dates-in-javascript.html 
 function date_udiff( d2, d1, unit )
 {
@@ -1695,46 +1910,93 @@ function DateX( year, month, day, hour, minutes, seconds, milliseconds )
         self.$date = new Date( );
     }
     self.$locale = DateX.defaultLocale;
+    self.$format = DateX.defaultFormat;
 }
 
 DateX.VERSION = "0.2.0";
 
+// DateX global defaults for localisation and formatting
 DateX.defaultLocale = date_locale_default;
+DateX.defaultFormat = "Y-m-d H:i:s";
+DateX.defaultDateFormat = "Y-m-d";
+DateX.defaultTimeFormat = "H:i:s";
+DateX.setDefaultLocale = function( locale ) {
+    if ( locale )
+    {
+        DateX.defaultLocale = locale;
+        DateX.defaultParser = DateX.getParser( DateX.defaultFormat, DateX.defaultLocale );
+    }
+};
+DateX.setDefaultFormat = function( fullfmt, datefmt, timefmt ) {
+    if ( fullfmt )
+    {
+        DateX.defaultFormat = fullfmt;
+        DateX.defaultParser = DateX.getParser( DateX.defaultFormat, DateX.defaultLocale );
+    }
+    if ( datefmt )
+    {
+        DateX.defaultDateFormat = datefmt;
+    }
+    if ( timefmt )
+    {
+        DateX.defaultTimeFormat = timefmt;
+    }
+};
+// general and flexible formatted string date parsing methods
+DateX.getParser = function( format, locale, strformat ) { 
+    if ( format && true === strformat ) format = cformat_to_phpformat(format);
+    return get_date_parser( format || DateX.defaultFormat, locale || DateX.defaultLocale );
+};
 
+DateX.defaultParser = DateX.getParser( DateX.defaultFormat, DateX.defaultLocale );
+
+DateX.parse = DateX.fromString = function( date_string, format, locale, strformat ) { 
+    var date_parse, date;
+    if ( (format && (DateX.defaultFormat !== format)) || (locale && (DateX.defaultLocale !== locale)) )
+        date_parse = DateX.getParser( format, locale, strformat );
+    else
+        date_parse = DateX.defaultParser;
+    date = date_parse( date_string );
+    return false !== date ? new DateX( date ) : false;
+};
+
+// Returns the numeric value corresponding to the current time - the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
 DateX.now = Date.now || function( ) { 
     return new Date( ).getTime( ); 
 };
+
+// Accepts the same parameters as the longest form of the constructor (i.e. 2 to 7) and returns the number of milliseconds since 1 January, 1970, 00:00:00 UTC
 DateX.UTC = Date.UTC;
 
-DateX.diff = date_diff;
+// various date diffing methods
+//DateX.diff = date_diff;
 DateX.udiff = date_udiff;
-DateX.diffApproximate = function( d2, d1, n, locale ) {
-    var diff = date_udiff_approx(d2, d1, n), l = diff.rel.length, 
+DateX.xdiff = DateX.diffExact = date_diff_exact;
+DateX.adiff = DateX.diffApproximate = function( d2, d1, n, locale ) {
+    var diff = date_diff_approx(d2, d1, n), l = diff.rel.length, 
         i, LU = (locale||DateX.defaultLocale).units, S = 'singular', P = 'plural';
     for (i=0; i<l; i++) diff.rel[i][1] = LU[1===diff.rel[i][0]?S:P][diff.rel[i][1]];
     return diff;
 };
-DateX.add = date_add;
+
+// various date patching/adding date diffs methods
+//DateX.add = date_add;
 DateX.uadd = date_uadd;
-DateX.parse = function( date_string, format, locale, strformat ) { 
-    if ( format && true === strformat ) format = cformat_to_phpformat(format);
-    var date_parse = get_date_parser( format || "Y-m-d H:i:s", locale || date_locale_default );
-    var date = date_parse( date_string );
-    return false !== date ? new DateX( date ) : false;
-};
-// alias
-DateX.fromString = DateX.parse;
+DateX.xadd = DateX.addExact = date_add_exact;
+
 
 DateX.prototype = {
      constructor: DateX
     
     ,$date: null
     ,$locale: null
+    ,$format: null
     
     ,dispose: function( ) {
         var self = this;
         self.$date = null;
         self.$locale = null;
+        self.$format = null;
         return self;
     }
     ,getDateObject: function( ) {
@@ -1745,14 +2007,41 @@ DateX.prototype = {
         self.$date = date;
         return self;
     }
-    ,diff: function( d ) {
-        return date_diff(this, d);
+    ,getLocale: function( ) {
+        return this.$locale;
     }
+    ,setLocale: function( locale ) {
+        var self = this;
+        self.$locale = locale;
+        return self;
+    }
+    ,getFormat: function( ) {
+        return this.$format;
+    }
+    ,setFormat: function( format ) {
+        var self = this;
+        self.$format = format;
+        return self;
+    }
+    
+    ,format: function( format, locale ) {
+        return get_formatted_date( this.$date, format || this.$format, locale || this.$locale ); 
+    }
+    ,strformat: function( format, locale ) {
+        return get_formatted_date( this.$date, cformat_to_phpformat( format || this.$format ), locale || this.$locale ); 
+    }
+    
+    /*,diff: function( d ) {
+        return DateX.diff(this, d);
+    }*/
     ,udiff: function( d, unit ) {
-        return date_udiff(this, d, unit);
+        return DateX.udiff(this, d, unit);
     }
-    ,diffApproximate: function( d, n, locale ) {
-        var diff = DateX.diffApproximate(this, d, n, locale||this.$locale), 
+    ,xdiff: function( d ) {
+        return DateX.xdiff(this, d);
+    }
+    ,adiff: function( d, n, locale ) {
+        var diff = DateX.adiff(this, d, n, locale||this.$locale), 
             l = diff.rel.length, i, fmt;
         if ( l > 1 )
         {
@@ -1767,25 +2056,14 @@ DateX.prototype = {
         fmt += diff.sign < 0 ? ' ago' : ' later';
         return fmt;
     }
-    ,add: function( diff ) {
-        return date_add(this, diff, true);
-    }
+    /*,add: function( diff ) {
+        return DateX.add(this, diff, true);
+    }*/
     ,uadd: function( udiff, unit ) {
-        return date_uadd(this, udiff, unit, true);
+        return DateX.uadd(this, udiff, unit, true);
     }
-    ,getLocale: function( ) {
-        return this.$locale;
-    }
-    ,setLocale: function( locale ) {
-        var self = this;
-        self.$locale = locale;
-        return self;
-    }
-    ,format: function( format, locale ) {
-        return get_formatted_date( this.$date, format || "Y-m-d H:i:s", locale || this.$locale ); 
-    }
-    ,strformat: function( format, locale ) {
-        return get_formatted_date( this.$date, cformat_to_phpformat( format ), locale || this.$locale ); 
+    ,xadd: function( diff ) {
+        return DateX.xadd(this, diff, true);
     }
     
     ,getDate: function( ) {
@@ -1928,30 +2206,30 @@ DateX.prototype = {
         return this.format( format );
     }
     ,toDateString: function( format, locale ) {
-        if ( arguments.length ) return this.format( format, locale );
+        if ( arguments.length ) return this.format( format||DateX.defaultDateFormat, locale||this.$locale );
         return this.$date.toDateString( );
     }
     ,toTimeString: function( format, locale ) {
-        if ( arguments.length ) return this.format( format, locale );
+        if ( arguments.length ) return this.format( format||DateX.defaultTimeFormat, locale||this.$locale );
         return this.$date.toTimeString( );
     }
     ,toLocaleDateString: function( format ) {
-        if ( arguments.length ) return this.format( format );
+        if ( arguments.length ) return this.format( format||DateX.defaultDateFormat, this.$locale  );
         return this.$date.toLocaleDateString( );
     }
     ,toLocaleTimeString: function( format ) {
-        if ( arguments.length ) return this.format( format );
+        if ( arguments.length ) return this.format( format||DateX.defaultTimeFormat, this.$locale );
         return this.$date.toLocaleTimeString( );
     }
     ,toLocaleString: function( format ) {
-        if ( arguments.length ) return this.format( format );
+        if ( arguments.length ) return this.format( format||this.$format, this.$locale );
         return this.$date.toLocaleString( );
     }
     ,toUTCString: function( ) {
         return this.$date.toUTCString( );
     }
     ,toString: function( format, locale ) {
-        if ( arguments.length ) return this.format( format, locale );
+        if ( arguments.length ) return this.format( format||this.$format, locale||this.$locale );
         return this.$date.toString( );
     }
 };
