@@ -19,7 +19,7 @@ echo(DateX.fromString( f, '%m/%d/%Y %H:%M:%S', null, true ).strformat('%m/%d/%Y 
 echo('('+later.format()+') MINUS ('+today.format()+')');
 echo(diff=later.xdiff(today));
 echo('Difference (in '+unit+') ~ ' + Math.round(udiff=later.udiff(today, unit)));
-echo('Approximately: ' + later.adiff( today, 3 ));
+echo('Approximately: ' + DateX.formatDiff(later.adiff( today, 3 )));
 echo(DateX.uadd(today, udiff, unit).format());
 echo(DateX.xadd(today, diff).format());
 echo(DateX.xadd(today, {months:1,days:1,minutes:30,seconds:40}).format());

@@ -1921,27 +1921,35 @@ DateX.defaultFormat = "Y-m-d H:i:s";
 DateX.defaultDateFormat = "Y-m-d";
 DateX.defaultTimeFormat = "H:i:s";
 DateX.setDefaultLocale = function( locale ) {
-    if ( locale )
+    if ( locale && (DateX.defaultLocale !== locale) )
     {
         DateX.defaultLocale = locale;
         DateX.defaultParser = DateX.getParser( DateX.defaultFormat, DateX.defaultLocale );
     }
 };
 DateX.setDefaultFormat = function( fullfmt, datefmt, timefmt ) {
-    if ( fullfmt )
+    if ( fullfmt && (DateX.defaultFormat !== fullfmt) )
     {
         DateX.defaultFormat = fullfmt;
         DateX.defaultParser = DateX.getParser( DateX.defaultFormat, DateX.defaultLocale );
     }
-    if ( datefmt )
+    if ( datefmt && (DateX.defaultDateFormat !== datefmt) )
     {
         DateX.defaultDateFormat = datefmt;
     }
-    if ( timefmt )
+    if ( timefmt && (DateX.defaultTimeFormat !== timefmt) )
     {
         DateX.defaultTimeFormat = timefmt;
     }
 };
+DateX.resetDefaults = function( ) {
+    DateX.defaultLocale = date_locale_default;
+    DateX.defaultFormat = "Y-m-d H:i:s";
+    DateX.defaultDateFormat = "Y-m-d";
+    DateX.defaultTimeFormat = "H:i:s";
+    DateX.defaultParser = DateX.getParser( DateX.defaultFormat, DateX.defaultLocale );
+};
+
 // general and flexible formatted string date parsing methods
 DateX.getParser = function( format, locale, strformat ) { 
     if ( format && true === strformat ) format = cformat_to_phpformat(format);
@@ -1958,6 +1966,10 @@ DateX.parse = DateX.fromString = function( date_string, format, locale, strforma
         date_parse = DateX.defaultParser;
     date = date_parse( date_string );
     return false !== date ? new DateX( date ) : false;
+};
+DateX.format = function( date, format, locale, strformat ) { 
+    if ( format && true === strformat ) format = cformat_to_phpformat(format);
+    return get_formatted_date( date instanceof DateX ? date.$date : date, format || DateX.defaultFormat, locale || DateX.defaultLocale ); 
 };
 
 // Returns the numeric value corresponding to the current time - the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
@@ -1977,6 +1989,21 @@ DateX.adiff = DateX.diffApproximate = function( d2, d1, n, locale ) {
         i, LU = (locale||DateX.defaultLocale).units, S = 'singular', P = 'plural';
     for (i=0; i<l; i++) diff.rel[i][1] = LU[1===diff.rel[i][0]?S:P][diff.rel[i][1]];
     return diff;
+};
+DateX.formatDiff = function( adiff ) {
+    var l = adiff.rel.length, i, fmt = '';
+    if ( l > 1 )
+    {
+        fmt = adiff.rel[0][0] + ' ' + adiff.rel[0][1];
+        for (i=1; i<l-1; i++) fmt += ', ' + adiff.rel[i][0] + ' ' + adiff.rel[i][1];
+        fmt += ' and ' + adiff.rel[l-1][0] + ' ' + adiff.rel[l-1][1];
+    }
+    else
+    {
+        fmt = adiff.rel[0][0] + ' ' + adiff.rel[0][1];
+    }
+    fmt += adiff.sign < 0 ? ' ago' : ' later';
+    return fmt;
 };
 
 // various date patching/adding date diffs methods
@@ -2041,20 +2068,7 @@ DateX.prototype = {
         return DateX.xdiff(this, d);
     }
     ,adiff: function( d, n, locale ) {
-        var diff = DateX.adiff(this, d, n, locale||this.$locale), 
-            l = diff.rel.length, i, fmt;
-        if ( l > 1 )
-        {
-            fmt = diff.rel[0][0] + ' ' + diff.rel[0][1];
-            for (i=1; i<l-1; i++) fmt += ', ' + diff.rel[i][0] + ' ' + diff.rel[i][1];
-            fmt += ' and ' + diff.rel[l-1][0] + ' ' + diff.rel[l-1][1];
-        }
-        else
-        {
-            fmt = diff.rel[0][0] + ' ' + diff.rel[0][1];
-        }
-        fmt += diff.sign < 0 ? ' ago' : ' later';
-        return fmt;
+        return DateX.adiff(this, d, n, locale||this.$locale);
     }
     /*,add: function( diff ) {
         return DateX.add(this, diff, true);
