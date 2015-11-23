@@ -2,33 +2,25 @@
 *
 *   DateX
 *   eXtended and localised Date parsing, diffing, formatting and validation for Node/JS, Python, PHP
-*   @version: 0.2.0
+*   @version: 0.2.1
 *
 *   https://github.com/foo123/DateX
 *
 **/
 !function( root, name, factory ) {
 "use strict";
-
-// export the module, umd-style (no other dependencies)
-var isCommonJS = ("object" === typeof(module)) && module.exports, 
-    isAMD = ("function" === typeof(define)) && define.amd, m;
-
-// CommonJS, node, etc..
-if ( isCommonJS ) 
-    module.exports = (module.$deps = module.$deps || {})[ name ] = module.$deps[ name ] || (factory.call( root, {NODE:module} ) || 1);
-
-// AMD, requireJS, etc..
-else if ( isAMD && ("function" === typeof(require)) && ("function" === typeof(require.specified)) && require.specified(name) ) 
-    define( name, ['require', 'exports', 'module'], function( require, exports, module ){ return factory.call( root, {AMD:module} ); } );
-
-// browser, web worker, etc.. + AMD, other loaders
-else if ( !(name in root) ) 
-    (root[ name ] = (m=factory.call( root, {} ) || 1)) && isAMD && define( name, [], function( ){ return m; } );
-
+var m;
+if ( ('undefined'!==typeof Components)&&('object'===typeof Components.classes)&&('object'===typeof Components.classesByID)&&Components.utils&&('function'===typeof Components.utils['import']) ) /* XPCOM */
+    (root.EXPORTED_SYMBOLS = [ name ]) && (root[ name ] = factory.call( root ));
+else if ( ('object'===typeof module)&&module.exports ) /* CommonJS */
+    module.exports = factory.call( root );
+else if ( ('function'===typeof(define))&&define.amd&&('function'===typeof(require))&&('function'===typeof(require.specified))&&require.specified(name) ) /* AMD */
+    define(name,['require','exports','module'],function( ){return factory.call( root );});
+else if ( !(name in root) ) /* Browser/WebWorker/.. */
+    (root[ name ] = (m=factory.call( root )))&&('function'===typeof(define))&&define.amd&&define(function( ){return m;} );
 }(  /* current root */          this, 
     /* module name */           "DateX",
-    /* module factory */        function( exports, undef ) {
+    /* module factory */        function( undef ) {
 "use strict";
 
 var HAS = 'hasOwnProperty', floor = Math.floor, ceil = Math.ceil, round = Math.round, abs = Math.abs,
@@ -1913,7 +1905,7 @@ function DateX( year, month, day, hour, minutes, seconds, milliseconds )
     self.$format = DateX.defaultFormat;
 }
 
-DateX.VERSION = "0.2.0";
+DateX.VERSION = "0.2.1";
 
 // DateX global defaults for localisation and formatting
 DateX.defaultLocale = date_locale_default;
