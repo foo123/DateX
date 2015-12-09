@@ -2,7 +2,7 @@
 *
 *   DateX
 *   eXtended and localised Date parsing, diffing, formatting and validation for Node/JS, Python, PHP
-*   @version: 0.2.1
+*   @version: 0.2.2
 *
 *   https://github.com/foo123/DateX
 *
@@ -1331,7 +1331,7 @@ function check_and_create_date( dto, defaults )
             date = new Date( time );
     }
     
-    if ( null === date )
+    if ( null == date )
     {
     if ( dto[HAS]('ms') ) ms = dto.ms;
     else if ( defaults[HAS]('ms') ) ms = defaults.ms;
@@ -1381,15 +1381,16 @@ function check_and_create_date( dto, defaults )
     if ( dto[HAS]('days_month') && dto.days_month !== days_in_month[month-1] ) return false;
     if ( dto[HAS]('meridian') && ((hour > 11 && 'am' === dto.meridian) || (hour <= 11 && 'pm' === dto.meridian)) ) return false;
     
-    if ( null !== time )
+    if ( null != time )
     {
-        if ( date.getFullYear() !== time.getFullYear() ) return false;
+        if ( date.getTime() !== time.getTime() ) return false;
+        /*if ( date.getFullYear() !== time.getFullYear() ) return false;
         if ( date.getMonth() !== time.getMonth() ) return false;
         if ( date.getDate() !== time.getDate() ) return false;
         if ( date.getHours() !== time.getHours() ) return false;
         if ( date.getHours() !== time.getHours() ) return false;
         if ( date.getMinutes() !== time.getMinutes() ) return false;
-        if ( date.getSeconds() !== time.getSeconds() ) return false;
+        if ( date.getSeconds() !== time.getSeconds() ) return false;*/
     }
     }
     
@@ -1905,7 +1906,7 @@ function DateX( year, month, day, hour, minutes, seconds, milliseconds )
     self.$format = DateX.defaultFormat;
 }
 
-DateX.VERSION = "0.2.1";
+DateX.VERSION = "0.2.2";
 
 // DateX global defaults for localisation and formatting
 DateX.defaultLocale = date_locale_default;
@@ -1997,7 +1998,74 @@ DateX.formatDiff = function( adiff ) {
     fmt += adiff.sign < 0 ? ' ago' : ' later';
     return fmt;
 };
+DateX.prettyDiff = function( date, locale ) {
+    /*
+    * JavaScript Pretty Date
+    * Copyright (c) 2011 John Resig (ejohn.org)
+    * Licensed under the MIT and GPL licenses.
+    *
+    * Takes an ISO time and returns a string representing how long ago the date
+    * represents
+    *
+    * ('2008-01-28T20:24:17Z') // => '2 hours ago'
+    * ('2008-01-27T22:24:17Z') // => 'Yesterday'
+    * ('2008-01-26T22:24:17Z') // => '2 days ago'
+    * ('2008-01-14T22:24:17Z') // => '2 weeks ago'
+    * ('2007-12-15T22:24:17Z') // => 'more than 5 weeks ago'
+    *
+    */
+    var date, diff, day_diff, month_diff, year_diff, then = 'ago';
 
+    diff = (DateX.now() - date.getTime()) / 1000;
+    if( isNaN(diff) ) return ;
+    
+    var localised = (function ( locale ) {
+        return function( s, args ) {
+            var ls = locale.hasOwnProperty(s) ? locale[s] : s;
+            if ( args && args.length )
+            {
+                var pp = 0, p = 0, i = 0, ls2 = '';
+                while ( -1 < (p=ls.indexOf('%s', pp)) )
+                {
+                    ls2 += ls.slice(pp, p) + args[i++];
+                    pp = p+2;
+                }
+                ls2 += ls.slice( pp );
+                ls = ls2;
+            }
+            return ls;
+        };
+    })(locale||{});
+    
+    if ( 0 > diff )
+    {
+        diff = -diff;
+        then = 'later';
+    }
+    day_diff = floor(diff / 86400);
+    month_diff = floor(diff / 2678400);
+    year_diff = floor(diff / 31536000);
+
+
+    if ( 60 > diff ) return localised('just now');
+    if( 120 > diff ) return localised('one minute '+then);
+    if( 3600 > diff ) return localised('%s minutes '+then, [floor(diff/60)]);
+    if( 7200 > diff ) return localised('one hour '+then);
+    if( 86400 > diff ) return localised('%s hours '+then, [floor(diff/3600)]);
+    if ( 1 > month_diff && 1 > year_diff )
+    {
+        if( 1 === day_diff ) return localised('ago' === then ? 'yesterday' : 'tomorrow');
+        if( 7 > day_diff ) return localised('%s days '+then, [day_diff]);
+        if( 31 > day_diff ) return localised('%s weeks '+then, [ceil(day_diff/7)]);
+    }
+    if ( 1 > year_diff )
+    {
+        if( 1 === month_diff ) return localised('one month '+then);
+        if( 12 > month_diff ) return localised('%s months '+then, [month_diff]);
+    }
+    if ( 1 === year_diff ) return localised('one year '+then);
+    return localised('%s years '+then, [year_diff]);
+};
 // various date patching/adding date diffs methods
 //DateX.add = date_add;
 DateX.uadd = date_uadd;
@@ -2061,6 +2129,9 @@ DateX.prototype = {
     }
     ,adiff: function( d, n, locale ) {
         return DateX.adiff(this, d, n, locale||this.$locale);
+    }
+    ,prettydiff: function( locale ) {
+        return DateX.prettyDiff(this.$date, locale||this.$locale);
     }
     /*,add: function( diff ) {
         return DateX.add(this, diff, true);
