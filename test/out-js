@@ -1,21 +1,21 @@
 DateX.VERSION = 0.2.2
-Wed, 2015-12-09 21:00:02
-Wed, 2015-12-09 21:00:02
-12/09/2015 21:00:02
-12/09/2015 21:00:02
-(Sun, 2016-01-10 21:30:42) MINUS (Wed, 2015-12-09 21:00:02)
+Fri, 2015-12-11 11:51:57
+Fri, 2015-12-11 11:51:57
+12/11/2015 11:51:57
+12/11/2015 11:51:57
+(Tue, 2016-01-12 12:22:37) MINUS (Fri, 2015-12-11 11:51:57)
 { sign: 1,
   years: 1,
   months: -11,
   days: 1,
-  hours: 0,
-  minutes: 30,
-  seconds: 40,
-  milliseconds: -836 }
+  hours: 1,
+  minutes: -29,
+  seconds: -20,
+  milliseconds: -587 }
 Difference (in days) ~ 32
 Approximately: 1 year later
 Pretty: one month ago
 Pretty: one month later
-Sun, 2016-01-10 21:30:42
-Sun, 2016-01-10 21:30:42
-Sun, 2016-01-10 21:30:42
+Tue, 2016-01-12 12:22:37
+Tue, 2016-01-12 12:22:37
+Tue, 2016-01-12 12:22:37

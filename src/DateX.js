@@ -2014,7 +2014,7 @@ DateX.prettyDiff = function( date, locale ) {
     * ('2007-12-15T22:24:17Z') // => 'more than 5 weeks ago'
     *
     */
-    var date, diff, day_diff, month_diff, year_diff, then = 'ago';
+    var date, diff, day_diff, month_diff, year_diff,  then = 'ago';
 
     diff = (DateX.now() - date.getTime()) / 1000;
     if( isNaN(diff) ) return ;
@@ -2043,26 +2043,19 @@ DateX.prettyDiff = function( date, locale ) {
         then = 'later';
     }
     day_diff = floor(diff / 86400);
-    month_diff = floor(diff / 2678400);
-    year_diff = floor(diff / 31536000);
-
+    month_diff = floor(day_diff / 30.5); // approx
+    year_diff = floor(day_diff / 365.25); // approx
 
     if ( 60 > diff ) return localised('just now');
     if( 120 > diff ) return localised('one minute '+then);
     if( 3600 > diff ) return localised('%s minutes '+then, [floor(diff/60)]);
     if( 7200 > diff ) return localised('one hour '+then);
     if( 86400 > diff ) return localised('%s hours '+then, [floor(diff/3600)]);
-    if ( 1 > month_diff && 1 > year_diff )
-    {
-        if( 1 === day_diff ) return localised('ago' === then ? 'yesterday' : 'tomorrow');
-        if( 7 > day_diff ) return localised('%s days '+then, [day_diff]);
-        if( 31 > day_diff ) return localised('%s weeks '+then, [ceil(day_diff/7)]);
-    }
-    if ( 1 > year_diff )
-    {
-        if( 1 === month_diff ) return localised('one month '+then);
-        if( 12 > month_diff ) return localised('%s months '+then, [month_diff]);
-    }
+    if( 1 === day_diff ) return localised('ago' === then ? 'yesterday' : 'tomorrow');
+    if( 7 > day_diff ) return localised('%s days '+then, [day_diff]);
+    if( 31 > day_diff ) return localised('%s weeks '+then, [ceil(day_diff/7)]);
+    if( 1 === month_diff ) return localised('one month '+then);
+    if( 12 > month_diff ) return localised('%s months '+then, [month_diff]);
     if ( 1 === year_diff ) return localised('one year '+then);
     return localised('%s years '+then, [year_diff]);
 };
