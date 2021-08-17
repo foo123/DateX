@@ -1,4 +1,4 @@
-var DateX = require('../src/js/DateX'), 
+var DateX = require('../src/js/DateX.js'), 
     echo = console.log, today, later, before, d, f, diff, udiff, unit='days';
 
 echo('DateX.VERSION = ' + DateX.VERSION);

@@ -1,6 +1,10 @@
 # DateX
 
-eXtended and localised Date parsing, diffing, formatting and validation for Node/XPCOM/JS, Python, PHP, ActionScript
+eXtended and localised Date parsing, diffing, formatting and validation for JavaScript, PHP, Python
 
-* `DateX` is also a `XPCOM JavaScript Component` (Firefox) (e.g to be used in firefox browser addons/plugins)
+**version: 1.0.0**
 
+![DateX](/datex.jpg)
+
+
+see `test/` folder
