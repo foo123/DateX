@@ -403,7 +403,7 @@ var HAS = Object.prototype.hasOwnProperty, floor = Math.floor, ceil = Math.ceil,
     ,c: function(locale, dto) {
          if (!HAS.call(dto,'c'))
          {
-            dto.c = date_patterns.Y(locale, dto)+'-'+date_patterns.m(locale, dto)+'-'+date_patterns.d(locale, dto)+'\\'+date_patterns.T(locale, dto)+date_patterns.H(locale, dto)+':'+date_patterns.i(locale, dto)+':'+date_patterns.s(locale, dto)+date_patterns.P(locale, dto);
+            dto.c = date_patterns.Y(locale, dto)+'-'+date_patterns.m(locale, dto)+'-'+date_patterns.d(locale, dto)+'\\\\'+date_patterns.T(locale, dto)+date_patterns.H(locale, dto)+':'+date_patterns.i(locale, dto)+':'+date_patterns.s(locale, dto)+date_patterns.P(locale, dto);
          }
          return dto.c;
     }
@@ -962,10 +962,10 @@ var HAS = Object.prototype.hasOwnProperty, floor = Math.floor, ceil = Math.ceil,
             ,d = date_formatters.d(jsdate, locale, dto)
             ,T = date_formatters.T(jsdate, locale, dto)
             ,H = date_formatters.H(jsdate, locale, dto)
-            ,u = date_formatters.i(jsdate, locale, dto)
+            ,i = date_formatters.i(jsdate, locale, dto)
             ,s = date_formatters.s(jsdate, locale, dto)
             ,P = date_formatters.P(jsdate, locale, dto);
-            dto.c = [ Y,'-',m,'-',d,'\\',T,H,':',i,':',s,P ].join('');
+            dto.c = [ Y,'-',m,'-',d,'\\',T,H,':',i,':',s,P].join('');
         }
         return dto.c;
     }
@@ -978,10 +978,10 @@ var HAS = Object.prototype.hasOwnProperty, floor = Math.floor, ceil = Math.ceil,
             ,D = date_formatters.D(jsdate, locale, dto)
             ,d = date_formatters.d(jsdate, locale, dto)
             ,H = date_formatters.H(jsdate, locale, dto)
-            ,u = date_formatters.i(jsdate, locale, dto)
+            ,i = date_formatters.i(jsdate, locale, dto)
             ,s = date_formatters.s(jsdate, locale, dto)
             ,O = date_formatters.O(jsdate, locale, dto);
-            dto.r = [ D,', ',d,' ',M,' ',Y,' ',H,':',i,':',s,' ',O ].join('');
+            dto.r = [ D,', ',d,' ',M,' ',Y,' ',H,':',i,':',s,' ',O].join('');
         }
         return dto.r;
     }
